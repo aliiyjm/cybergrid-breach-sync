@@ -1,0 +1,15 @@
+node_modules/
+client/dist/
+server/dist/
+reports/*
+!reports/.gitkeep
+!reports/evidencias/
+test-results/
+playwright-report/
+blob-report/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+coverage/

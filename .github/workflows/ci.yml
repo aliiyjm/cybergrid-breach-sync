@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: Tipos, Vitest y Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cybergrid
+          POSTGRES_PASSWORD: cybergrid
+          POSTGRES_DB: cybergrid_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cybergrid -d cybergrid_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      CI: 'true'
+      NODE_ENV: test
+      TEST_DATABASE_URL: postgres://cybergrid:cybergrid@localhost:5432/cybergrid_test
+      DATABASE_URL: postgres://cybergrid:cybergrid@localhost:5432/cybergrid_test
+
+    steps:
+      - name: 1. Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Comprobar que existe package-lock.json
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "::error::Falta package-lock.json. Ejecuta 'npm install' en local y sube el archivo generado para que la instalación sea reproducible."
+            exit 1
+          fi
+
+      - name: 2. Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: 3. Instalar dependencias (npm ci, reproducible)
+        run: npm ci
+
+      - name: 4. Comprobación de tipos
+        run: npm run typecheck
+
+      - name: Compilar cliente y servidor
+        run: npm run build
+
+      - name: Aplicar migraciones a la base de datos de pruebas
+        run: node server/dist/migrate.js
+
+      - name: 5. Pruebas unitarias y de integración (Vitest)
+        run: npm run test:ci
+
+      - name: Instalar Chromium para Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: 6. Pruebas End-to-End (Playwright)
+        env:
+          E2E_SKIP_BUILD: '1'
+        run: npm run test:e2e
+
+      - name: 7. Verificar que las suites obligatorias se ejecutaron
+        if: always()
+        run: npm run verify:reports
+
+      - name: Medición de rendimiento de la API (evidencia)
+        if: success()
+        run: |
+          node server/dist/index.js > reports/server-bench.log 2>&1 &
+          SERVER_PID=$!
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:3000/api/health > /dev/null && break; sleep 1; done
+          npm run bench:api -- --url http://127.0.0.1:3000 --out reports/api-benchmark.json
+          npm run bench:latency -- --url http://127.0.0.1:3000 --out reports/latency.json
+          kill $SERVER_PID
+        env:
+          PORT: '3000'
+          HOST: 127.0.0.1
+          LOG_LEVEL: warn
+
+      - name: Resumen en la ejecución
+        if: always()
+        run: node scripts/verify-test-reports.mjs --summary >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 8. Publicar informes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informes-de-pruebas
+          path: reports/
+          retention-days: 14
+          if-no-files-found: warn

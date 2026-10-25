@@ -1,0 +1,24 @@
+{
+  "name": "@cybergrid/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Servidor autoritativo de CyberGrid: API REST (Express), tiempo real (Socket.IO) y persistencia (PostgreSQL)",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "migrate": "tsx src/database/migrate.ts"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.13.0",
+    "sharp": "^0.35.0",
+    "socket.io": "^4.8.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/pg": "^8.11.0",
+    "socket.io-client": "^4.8.1"
+  }
+}

@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#060914" />
+    <meta name="description" content="CyberGrid: Breach & Sync — arena multijugador cyberpunk en tiempo real." />
+    <title>CyberGrid: Breach &amp; Sync</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/main.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+
+    <header class="topbar" id="topbar">
+      <a class="wordmark" href="#/" aria-label="CyberGrid, ir al inicio">
+        <span class="wordmark__grid" aria-hidden="true"></span>
+        <span>CyberGrid</span>
+      </a>
+      <div class="topbar__status">
+        <span class="net" id="net-status" data-state="offline" data-testid="net-status" title="Estado de la conexión en tiempo real">
+          <span class="net__dot" aria-hidden="true"></span>
+          <span class="net__label" id="net-label">Sin conexión</span>
+          <span class="net__ping" id="net-ping" data-testid="ping-value" data-ping-ms="">— ms</span>
+        </span>
+        <span class="topbar__user" id="topbar-user" hidden>
+          <span id="topbar-username" data-testid="current-user"></span>
+          <a class="btn btn--ghost btn--small" href="#/personaje" data-testid="nav-profile">Personaje</a>
+          <button type="button" class="btn btn--ghost btn--small" id="logout-btn" data-testid="logout">Cerrar sesión</button>
+        </span>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- INICIO -->
+      <section class="screen screen--home" id="screen-home" data-screen="home" hidden>
+        <div class="home">
+          <div class="home__preview">
+            <canvas id="map-preview" aria-label="Vista previa de una arena generada proceduralmente" role="img"></canvas>
+            <div class="home__seed">
+              <span>Arena <output id="preview-seed" data-testid="preview-seed">—</output></span>
+              <button type="button" class="btn btn--ghost btn--small" id="preview-reroll">Generar otra arena</button>
+            </div>
+          </div>
+          <div class="home__copy">
+            <h1 class="title">CyberGrid<span class="title__sub">Breach &amp; Sync</span></h1>
+            <p class="lead">
+              Entra a la arena, recoge fragmentos y elimina a los demás jugadores antes de que acabe el tiempo. Cada
+              arena se genera a partir de una semilla aleatoria.
+            </p>
+            <div class="home__actions">
+              <a class="btn btn--primary" href="#/acceso" id="home-cta" data-testid="home-cta">Iniciar sesión</a>
+              <a class="btn btn--ghost" href="#/acceso?modo=registro" id="home-register">Crear cuenta</a>
+            </div>
+            <dl class="rules">
+              <div><dt>Objetivo</dt><dd>Primero en llegar a la puntuación de la sala (<span data-score-targets>30, 40 o 50</span> puntos), o más puntos cuando acabe el tiempo.</dd></div>
+              <div><dt>Puntos</dt><dd>Eliminación +3 · Fragmento de datos +1</dd></div>
+              <div><dt>Ordenador</dt><dd>WASD o flechas para moverte, ratón para apuntar, clic para disparar, Mayús o Espacio para el impulso.</dd></div>
+              <div><dt>Móvil</dt><dd>Joystick a la izquierda; disparo e impulso a la derecha.</dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <!-- AUTENTICACIÓN -->
+      <section class="screen screen--auth" id="screen-auth" data-screen="auth" hidden>
+        <div class="panel panel--narrow">
+          <div class="tabs" role="tablist" aria-label="Acceso">
+            <button type="button" role="tab" class="tabs__tab" id="tab-login" aria-selected="true" aria-controls="login-form" data-testid="tab-login">Iniciar sesión</button>
+            <button type="button" role="tab" class="tabs__tab" id="tab-register" aria-selected="false" aria-controls="register-form" data-testid="tab-register">Crear cuenta</button>
+          </div>
+
+          <form id="login-form" class="form" novalidate data-testid="login-form">
+            <h2 class="panel__title">Iniciar sesión</h2>
+            <label class="field">
+              <span class="field__label">Usuario</span>
+              <input name="username" autocomplete="username" required minlength="1" maxlength="20" data-testid="login-username" />
+            </label>
+            <label class="field">
+              <span class="field__label">Contraseña</span>
+              <input name="password" type="password" autocomplete="current-password" required maxlength="72" data-testid="login-password" />
+            </label>
+            <p class="form__error" role="alert" data-testid="login-error" hidden></p>
+            <button class="btn btn--primary btn--block" type="submit" data-testid="login-submit">Iniciar sesión</button>
+          </form>
+
+          <form id="register-form" class="form" novalidate hidden data-testid="register-form">
+            <h2 class="panel__title">Crear cuenta</h2>
+            <label class="field">
+              <span class="field__label">Usuario</span>
+              <input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" data-testid="register-username" />
+              <span class="field__hint">3-20 caracteres: letras sin tilde, números o guion bajo.</span>
+            </label>
+            <label class="field">
+              <span class="field__label">Contraseña</span>
+              <input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="72" data-testid="register-password" />
+              <span class="field__hint">Mínimo 8 caracteres.</span>
+            </label>
+            <label class="field">
+              <span class="field__label">Repite la contraseña</span>
+              <input name="confirm" type="password" autocomplete="new-password" required minlength="8" maxlength="72" data-testid="register-confirm" />
+            </label>
+            <p class="form__error" role="alert" data-testid="register-error" hidden></p>
+            <button class="btn btn--primary btn--block" type="submit" data-testid="register-submit">Crear cuenta</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- LOBBY -->
+      <section class="screen screen--lobby" id="screen-lobby" data-screen="lobby" hidden>
+        <div class="lobby">
+          <div class="panel lobby__rooms">
+            <div class="current-room" id="current-room" hidden data-testid="current-room">
+              <p class="current-room__text">Sigues en la sala <strong id="current-room-name"></strong></p>
+              <div class="current-room__actions">
+                <button type="button" class="btn btn--primary btn--small" id="current-room-return" data-testid="current-room-return">Volver a la sala</button>
+                <button type="button" class="btn btn--ghost btn--small" id="current-room-leave" data-testid="current-room-leave">Salir de la sala</button>
+              </div>
+            </div>
+            <div class="panel__head">
+              <h2 class="panel__title">Salas abiertas</h2>
+              <button type="button" class="btn btn--ghost btn--small" id="rooms-refresh">Actualizar</button>
+            </div>
+            <ul class="room-list" id="room-list" data-testid="room-list" aria-live="polite"></ul>
+            <p class="empty" id="room-list-empty" hidden>No hay salas todavía. Crea una y comparte su nombre.</p>
+            <form class="join-code" id="join-code-form" hidden data-testid="join-code-form" novalidate>
+              <label class="field">
+                <span class="field__label">Código de acceso de <strong id="join-code-room"></strong></span>
+                <input name="code" autocomplete="off" maxlength="12" data-testid="join-code-input" />
+              </label>
+              <div class="join-code__actions">
+                <button type="submit" class="btn btn--primary btn--small" data-testid="join-code-submit">Unirse</button>
+                <button type="button" class="btn btn--ghost btn--small" id="join-code-cancel">Cancelar</button>
+              </div>
+              <p class="form__error" role="alert" data-testid="join-error" hidden></p>
+            </form>
+          </div>
+
+          <div class="lobby__side">
+            <form class="panel form" id="create-room-form" novalidate data-testid="create-room-form">
+              <h2 class="panel__title">Crear sala</h2>
+              <label class="field">
+                <span class="field__label">Nombre</span>
+                <input name="name" required minlength="3" maxlength="32" placeholder="Nodo Sur" data-testid="room-name" />
+              </label>
+              <label class="field">
+                <span class="field__label">Capacidad</span>
+                <select name="maxPlayers" data-testid="room-capacity">
+                  <option value="2">2 jugadores</option>
+                  <option value="4" selected>4 jugadores</option>
+                  <option value="6">6 jugadores</option>
+                  <option value="8">8 jugadores</option>
+                </select>
+              </label>
+              <fieldset class="score-picker" data-testid="score-picker">
+                <legend class="field__label">Puntuación para ganar</legend>
+                <!-- Opciones generadas a partir de SCORE_TARGETS (shared/matchConfig.ts) -->
+                <div class="score-picker__options" id="score-options"></div>
+              </fieldset>
+              <label class="check">
+                <input type="checkbox" name="isPrivate" data-testid="room-private" />
+                <span>Sala privada (con código de acceso)</span>
+              </label>
+              <label class="field" id="access-code-field" hidden>
+                <span class="field__label">Código de acceso</span>
+                <input name="accessCode" maxlength="12" autocomplete="off" placeholder="4-12 letras o números" data-testid="room-code" />
+              </label>
+              <p class="form__error" role="alert" data-testid="create-room-error" hidden></p>
+              <button class="btn btn--primary btn--block" type="submit" data-testid="create-room-submit">Crear sala</button>
+            </form>
+
+            <a class="panel profile-teaser" href="#/personaje" data-testid="profile-teaser">
+              <span class="profile-teaser__avatar" id="lobby-avatar" aria-hidden="true"></span>
+              <span>
+                <span class="profile-teaser__title">Personalizar personaje</span>
+                <span class="profile-teaser__hint">Usa tu propia imagen en la arena</span>
+              </span>
+            </a>
+
+            <div class="panel">
+              <h2 class="panel__title">Tu historial</h2>
+              <dl class="stats" id="career-stats" data-testid="career-stats"></dl>
+            </div>
+
+            <div class="panel">
+              <h2 class="panel__title">Clasificación</h2>
+              <ol class="leaderboard" id="leaderboard"></ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SALA -->
+      <section class="screen screen--room" id="screen-room" data-screen="room" hidden>
+        <div class="panel room">
+          <div class="room__head">
+            <div>
+              <h2 class="panel__title" id="room-name" data-testid="room-title"></h2>
+              <p class="room__meta" id="room-meta"></p>
+            </div>
+            <button type="button" class="btn btn--ghost btn--small" id="room-leave" data-testid="room-leave">Salir de la sala</button>
+          </div>
+          <ul class="members" id="room-members" data-testid="room-members" aria-live="polite"></ul>
+          <p class="room__status" id="room-status" data-testid="room-status" aria-live="assertive"></p>
+          <div class="room__actions">
+            <button type="button" class="btn btn--primary" id="ready-btn" data-testid="ready-btn">Estoy listo</button>
+          </div>
+          <p class="room__hint">La partida empieza cuando hay al menos 2 jugadores y todos están listos.</p>
+        </div>
+      </section>
+
+      <!-- PARTIDA -->
+      <section class="screen screen--game" id="screen-game" data-screen="game" hidden>
+        <div class="game" id="game-root">
+          <canvas id="game-canvas" data-testid="game-canvas" aria-label="Arena de juego"></canvas>
+
+          <!-- Estado autoritativo expuesto para pruebas automatizadas -->
+          <div id="player-state" data-testid="player-state" hidden
+               data-player-x="" data-player-y="" data-player-hp="" data-server-tick="" data-player-id=""></div>
+          <div id="world-state" data-testid="world-state" hidden data-players="[]"></div>
+
+          <div class="hud" aria-live="off">
+            <div class="hud__vitals">
+              <div class="bar bar--hp" title="Vida">
+                <span class="bar__label">Vida</span>
+                <span class="bar__track"><span class="bar__fill" id="hud-hp-fill"></span></span>
+                <span class="bar__value" id="hud-hp" data-testid="hud-hp">100</span>
+              </div>
+              <div class="bar bar--energy" title="Energía">
+                <span class="bar__label">Energía</span>
+                <span class="bar__track"><span class="bar__fill" id="hud-energy-fill"></span></span>
+                <span class="bar__value" id="hud-energy">100</span>
+              </div>
+              <div class="hud__inventory">Fragmentos <strong id="hud-shards">0</strong></div>
+              <div class="hud__score" data-testid="hud-score"><strong id="hud-score">0</strong> / <span id="hud-target">—</span> puntos</div>
+              <div class="hud__upgrade" data-testid="hud-upgrade" title="Progreso de mejoras: independiente de la puntuación para ganar">
+                <div class="bar bar--upgrade">
+                  <span class="bar__label">Mejora</span>
+                  <span class="bar__track"><span class="bar__fill" id="hud-upgrade-fill"></span></span>
+                  <span class="bar__value" id="hud-upgrade-text" data-testid="hud-upgrade-progress">0/10</span>
+                </div>
+                <ul class="hud__perks" id="hud-perks" aria-label="Mejoras activas" data-testid="hud-perks"></ul>
+              </div>
+              <button type="button" class="btn btn--small upgrade-reopen" id="hud-upgrade-open" hidden data-testid="upgrade-reopen">Mejora disponible (M)</button>
+              <button type="button" class="btn btn--ghost btn--small game__exit" id="game-exit">Abandonar</button>
+            </div>
+
+            <div class="hud__center">
+              <div class="hud__timer-label">Tiempo restante</div>
+              <div class="hud__timer" id="hud-timer" data-testid="hud-timer">3:00</div>
+              <div class="hud__goal" id="hud-goal" data-testid="hud-status">En curso · gana quien llegue a 15</div>
+            </div>
+
+            <ol class="hud__scores" id="hud-scores" data-testid="scoreboard"></ol>
+
+            <div class="hud__debug" id="hud-debug" data-testid="debug-overlay">
+              <span>FPS <strong id="hud-fps" data-testid="fps-value">0</strong></span>
+              <span>Ping <strong id="hud-ping">—</strong></span>
+              <span>Tick <strong id="hud-tick">0</strong></span>
+            </div>
+
+            <!-- Habilidades con recarga (rayo, teletransporte, sobrecarga): estado calculado por el servidor -->
+            <ul class="hud__abilities" id="hud-abilities" data-testid="hud-abilities" aria-label="Habilidades" hidden></ul>
+
+            <ul class="hud__feed" id="hud-feed"></ul>
+            <div class="hud__overlay" id="hud-overlay" hidden></div>
+          </div>
+
+          <!-- Elección de mejora: no pausa la partida ni tapa los controles -->
+          <section class="upgrade-panel" id="upgrade-panel" hidden role="dialog" aria-modal="false"
+                   aria-labelledby="upgrade-title" data-testid="upgrade-panel">
+            <header class="upgrade-panel__head">
+              <h2 class="upgrade-panel__title" id="upgrade-title">¡Mejora tu nave!</h2>
+              <span class="upgrade-panel__milestone" id="upgrade-milestone" data-testid="upgrade-milestone">Hito 10</span>
+            </header>
+            <div class="upgrade-panel__options" id="upgrade-options"></div>
+            <footer class="upgrade-panel__foot">
+              <p class="upgrade-panel__status" id="upgrade-status" role="status" aria-live="polite"></p>
+              <button type="button" class="btn btn--ghost btn--small" id="upgrade-later">Más tarde</button>
+            </footer>
+          </section>
+
+          <div class="touch" id="touch-controls" hidden data-testid="touch-controls">
+            <div class="touch__stick" id="touch-stick" aria-label="Joystick de movimiento">
+              <span class="touch__knob" id="touch-knob"></span>
+            </div>
+            <div class="touch__abilities">
+              <button type="button" class="touch__btn touch__btn--ability" id="touch-tp" aria-label="Teletransporte" hidden>Salto</button>
+              <button type="button" class="touch__btn touch__btn--ability touch__btn--overload" id="touch-ov" aria-label="Sobrecarga" hidden>Carga</button>
+            </div>
+            <div class="touch__buttons">
+              <button type="button" class="touch__btn touch__btn--dash" id="touch-dash" aria-label="Impulso">Impulso</button>
+              <button type="button" class="touch__btn touch__btn--fire" id="touch-fire" aria-label="Disparar">Disparar</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- RESULTADOS -->
+      <section class="screen screen--results" id="screen-results" data-screen="results" hidden>
+        <div class="panel results">
+          <h2 class="results__winner" id="results-winner" data-testid="results-winner"></h2>
+          <p class="results__meta" id="results-meta"></p>
+          <div class="table-wrap">
+            <table class="results__table" data-testid="results-table">
+              <thead>
+                <tr><th scope="col">#</th><th scope="col">Jugador</th><th scope="col">Puntos</th><th scope="col">Elim.</th><th scope="col">Muertes</th><th scope="col">KDR</th><th scope="col">Fragm.</th><th scope="col">Supervivencia</th></tr>
+              </thead>
+              <tbody id="results-body"></tbody>
+            </table>
+          </div>
+          <p class="results__note" id="results-note"></p>
+          <div class="results__actions">
+            <button type="button" class="btn btn--primary" id="results-room" data-testid="results-return">Volver al lobby de la sala</button>
+            <button type="button" class="btn btn--ghost" id="results-leave" data-testid="results-leave">Salir al lobby general</button>
+          </div>
+          <p class="form__error" role="alert" id="results-error" data-testid="results-error" hidden></p>
+        </div>
+      </section>
+      <!-- PERSONALIZAR PERSONAJE -->
+      <section class="screen screen--profile" id="screen-profile" data-screen="profile" hidden>
+        <div class="panel profile">
+          <div class="room__head">
+            <div>
+              <h2 class="panel__title">Personalizar personaje</h2>
+              <p class="room__meta">Tu imagen se dibuja dentro de tu unidad. No cambia su tamaño, velocidad ni daño.</p>
+            </div>
+            <a class="btn btn--ghost btn--small" href="#/lobby">Volver al lobby</a>
+          </div>
+
+          <div class="profile__grid">
+            <div class="profile__editor">
+              <div class="cropper" id="cropper" data-testid="cropper" data-state="empty" tabindex="0"
+                   aria-label="Encuadre de la imagen: arrastra para mover y usa el control de zoom">
+                <canvas id="cropper-canvas" width="320" height="320"></canvas>
+                <p class="cropper__empty" id="cropper-empty">Sube una imagen PNG o JPEG para encuadrarla aquí.</p>
+              </div>
+              <label class="field cropper__zoom" id="cropper-zoom-field" hidden>
+                <span class="field__label">Zoom</span>
+                <input type="range" id="cropper-zoom" min="1" max="4" step="0.01" value="1" data-testid="cropper-zoom" />
+              </label>
+              <p class="field__hint">Arrastra la imagen para centrarla. Se recorta en cuadrado sin deformarse.</p>
+            </div>
+
+            <div class="profile__side">
+              <div class="profile__previews">
+                <figure>
+                  <canvas id="avatar-preview-current" width="112" height="112" data-testid="avatar-current"></canvas>
+                  <figcaption>Actual</figcaption>
+                </figure>
+                <figure>
+                  <canvas id="avatar-preview-new" width="112" height="112" data-testid="avatar-new"></canvas>
+                  <figcaption>Nueva</figcaption>
+                </figure>
+              </div>
+
+              <input type="file" id="avatar-input" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden data-testid="avatar-input" />
+              <div class="profile__actions">
+                <button type="button" class="btn btn--ghost btn--block" id="avatar-pick" data-testid="avatar-pick">Subir imagen</button>
+                <button type="button" class="btn btn--primary btn--block" id="avatar-save" data-testid="avatar-save" disabled>Guardar apariencia</button>
+                <button type="button" class="btn btn--ghost btn--block" id="avatar-cancel" data-testid="avatar-cancel" disabled>Cancelar</button>
+                <button type="button" class="btn btn--ghost btn--block btn--danger" id="avatar-reset" data-testid="avatar-reset">Restablecer apariencia</button>
+              </div>
+              <p class="form__error" role="alert" id="avatar-error" data-testid="avatar-error" hidden></p>
+              <p class="form__ok" role="status" id="avatar-ok" data-testid="avatar-ok" hidden></p>
+              <p class="field__hint" id="avatar-limits">PNG o JPEG · máximo 2 MB · hasta 4096 × 4096 px.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+    <noscript><p class="noscript">CyberGrid necesita JavaScript para funcionar.</p></noscript>
+    <script type="module" src="/assets/main.js"></script>
+  </body>
+</html>

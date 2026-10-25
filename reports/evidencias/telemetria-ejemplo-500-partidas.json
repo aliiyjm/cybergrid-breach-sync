@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-10-24T18:31:26.519Z",
+  "queryTimeMs": 112.92,
+  "units": {
+    "winRatePct": "porcentaje (0-100)",
+    "kdr": "razón adimensional",
+    "survival.*Ms": "milisegundos",
+    "survival.avgRatePct": "porcentaje (0-100) del tiempo de partida",
+    "avgMatchDurationMs": "milisegundos",
+    "queryTimeMs": "milisegundos"
+  },
+  "formulas": {
+    "winRatePct": "100 × victorias / participaciones (0 si no hay participaciones)",
+    "kdr": "eliminaciones / max(muertes, 1); sin muertes, KDR = eliminaciones. En agregado global tiende a 1 porque cada eliminación es la muerte de otro jugador",
+    "avgParticipationKdr": "media de [eliminaciones / max(muertes, 1)] de cada jugador en cada partida",
+    "survival.avgMs": "media del tiempo vivo de cada jugador en cada partida",
+    "survival.avgRatePct": "media de min(tiempo vivo / duración de la partida, 1) × 100",
+    "participation": "un jugador en una partida (fila de match_players)"
+  },
+  "totals": {
+    "matches": 500,
+    "liveMatches": 0,
+    "seededMatches": 500,
+    "participations": 2000,
+    "distinctPlayers": 2000,
+    "wins": 500,
+    "losses": 1500,
+    "kills": 3746,
+    "deaths": 3746,
+    "shards": 5867
+  },
+  "metrics": {
+    "winRatePct": 25,
+    "kdr": 1,
+    "avgParticipationKdr": 1.06,
+    "avgKillsPerParticipation": 1.87,
+    "avgMatchDurationMs": 104809,
+    "survival": {
+      "avgMs": 98200,
+      "medianMs": 98466,
+      "p95Ms": 165062,
+      "maxMs": 178888,
+      "avgLongestLifeMs": 56136,
+      "avgRatePct": 92.24
+    }
+  },
+  "bySource": [
+    {
+      "source": "seed",
+      "matches": 500,
+      "participations": 2000,
+      "winRatePct": 25,
+      "kdr": 1,
+      "avgSurvivalMs": 98200
+    }
+  ],
+  "consistency": {
+    "killsMinusDeaths": 0,
+    "matchesWithoutSingleWinner": 0,
+    "survivalExceedsDuration": 0
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@cybergrid/client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cliente web de CyberGrid: HTML5, Canvas 2D, TypeScript y CSS sin motor de videojuegos",
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
+  }
+}

@@ -1,0 +1,16 @@
+# Verificación SQL de la versión 1.1 sobre PostgreSQL 16 (migración 2 sobre una BD de la versión 1.0)
+# Fecha: 2026-10-25T00:25:28-06:00
+aplicadas: [ 2 ] | segunda vez: []
+  ✓ las partidas existentes quedan con 15 puntos por defecto
+  ✓ la base de datos rechaza un objetivo distinto de 15/25/30
+  ✓ sin imagen: avatarUrl null
+  ✓ la sesión devuelve la URL generada por el servidor
+  ✓ la imagen guardada es idéntica byte a byte
+  ✓ al reemplazar se elimina la imagen anterior
+  ✓ un solo registro de imagen por usuario
+  ✓ otro usuario no se ve afectado
+  ✓ restablecer elimina la imagen
+  ✓ la partida guarda objetivo 25 y su límite de tiempo
+  byScoreTarget: [{"scoreToWin":15,"matches":101,"avgDurationMs":103726,"endedByScorePct":26.73},{"scoreToWin":25,"matches":1,"avgDurationMs":2000,"endedByScorePct":0}]
+  ✓ telemetría desglosa por puntuación objetivo
+  ✓ telemetría coherente

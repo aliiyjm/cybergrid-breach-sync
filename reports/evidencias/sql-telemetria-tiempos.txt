@@ -1,0 +1,13 @@
+# Tiempo de las consultas SQL de GET /api/test/telemetry en PostgreSQL 16 local
+# Datos: 1000 partidas, 4000 participaciones
+# 5 ejecuciones de la consulta principal y 5 de la consulta por origen (psql \timing)
+Time: 12.951 ms
+Time: 9.488 ms
+Time: 9.374 ms
+Time: 9.320 ms
+Time: 7.071 ms
+Time: 5.213 ms
+Time: 3.712 ms
+Time: 3.676 ms
+Time: 3.632 ms
+Time: 3.702 ms

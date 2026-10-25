@@ -1,0 +1,122 @@
+# Pruebas unitarias (81) ejecutadas con un sustituto local de Vitest — versión 1.1
+# Fecha: 2026-10-25T00:25:25-06:00 · Node v22.23.4 · sharp 0.35.4 (real) · PostgreSQL 16 vía psql para auth.test.ts
+
+== tests/unit/auth.test.ts
+  ✓ Contraseñas y sesiones > almacena un hash scrypt con sal y lo verifica
+  ✓ Contraseñas y sesiones > genera tokens de sesión opacos y solo guarda su SHA-256
+  ✓ Contraseñas y sesiones > extrae el token de la cookie o de la cabecera Authorization
+  ✓ Control de frecuencia > el cubo de fichas limita ráfagas y se recarga con el tiempo
+  ✓ Control de frecuencia > la ventana fija bloquea intentos de fuerza bruta
+RESULTADO 5 ok, 0 fallidas
+
+== tests/unit/avatar.test.ts
+  ✓ Detección de formato > reconoce extensión, MIME y firma real de PNG y JPEG
+  ✓ Procesado seguro de la imagen > acepta PNG y JPEG válidos y los re-codifica a PNG 128×128 sin deformar
+  ✓ Procesado seguro de la imagen > rechaza formatos no permitidos aunque se renombren
+  ✓ Procesado seguro de la imagen > rechaza archivos cuya extensión, MIME y contenido no coinciden
+  ✓ Procesado seguro de la imagen > rechaza HTML/JavaScript disfrazado de imagen
+  ✓ Procesado seguro de la imagen > rechaza archivos vacíos, demasiado grandes, corruptos o con dimensiones fuera de rango
+  ✓ Procesado seguro de la imagen > el encuadre siempre queda dentro de la imagen y es cuadrado
+RESULTADO 7 ok, 0 fallidas
+
+== tests/unit/collision.test.ts
+  ✓ Colisiones autoritativas jugador-mapa > detiene al jugador contra un muro
+  ✓ Colisiones autoritativas jugador-mapa > permite deslizarse a lo largo de la pared
+  ✓ Colisiones autoritativas jugador-mapa > no atraviesa muros con desplazamientos grandes ni sale del mapa
+  ✓ Colisiones autoritativas jugador-mapa > separa jugadores solapados
+  ✓ Trayectorias de proyectiles > el raycast encuentra el primer muro en la trayectoria
+  ✓ Trayectorias de proyectiles > detecta el impacto de un segmento con un círculo
+RESULTADO 6 ok, 0 fallidas
+
+== tests/unit/combat.test.ts
+  ✓ Fórmula de daño > aplica el daño base completo a corta distancia
+  ✓ Fórmula de daño > reduce el daño linealmente hasta el 50 % en el alcance máximo
+  ✓ Fórmula de daño > nunca produce daño negativo
+  ✓ Escalado del daño por racha > suma un 10 % por eliminación consecutiva
+  ✓ Escalado del daño por racha > limita la bonificación al 30 %
+  ✓ Aplicación de daño y cadencia > resta vida, elimina al llegar a 0 y respeta la protección de reaparición
+  ✓ Aplicación de daño y cadencia > impone la cadencia de disparo
+RESULTADO 7 ok, 0 fallidas
+
+== tests/unit/gameLoop.test.ts
+  ✓ Bucle de juego con delta time > ejecuta la misma lógica a 60, 120 y 144 Hz
+  ✓ Bucle de juego con delta time > tolera variaciones pequeñas entre fotogramas
+  ✓ Bucle de juego con delta time > limita los pasos tras una pausa prolongada
+  ✓ Bucle de juego con delta time > la cámara sigue al objetivo igual con cualquier frecuencia de refresco
+RESULTADO 4 ok, 0 fallidas
+
+== tests/unit/gameServer.test.ts
+  ✓ Simulación autoritativa > mueve al jugador a la velocidad del servidor, independiente del cliente
+  ✓ Simulación autoritativa > normaliza la diagonal y limita intenciones manipuladas (anti speed-hack)
+  ✓ Simulación autoritativa > descarta entradas repetidas o fuera de orden
+  ✓ Simulación autoritativa > impone la cadencia de disparo en el servidor
+  ✓ Simulación autoritativa > calcula impactos, daño, eliminación, estadísticas y reaparición
+  ✓ Simulación autoritativa > termina por puntuación y clasifica a los jugadores
+  ✓ Simulación autoritativa > termina por tiempo y registra la supervivencia
+  ✓ Simulación autoritativa > declara ganador al jugador que permanece si el rival abandona
+RESULTADO 8 ok, 0 fallidas
+
+== tests/unit/interpolation.test.ts
+  ✓ Interpolación de posiciones > interpola linealmente entre dos estados
+  ✓ Interpolación de posiciones > interpola el ángulo por el camino más corto
+  ✓ Interpolación de posiciones > no extrapola: t se limita a [0, 1]
+  ✓ Interpolación de posiciones > salta sin interpolar en una reaparición (teletransporte)
+  ✓ Interpolación de posiciones > elige el par de instantáneas que rodea el instante de render y reutiliza objetos
+RESULTADO 5 ok, 0 fallidas
+
+== tests/unit/mapGenerator.test.ts
+  ✓ Generación procedural de mapas > genera una arena con las dimensiones configuradas y borde sólido
+  ✓ Generación procedural de mapas > es reproducible: la misma semilla produce exactamente el mismo mapa
+  ✓ Generación procedural de mapas > semillas distintas producen mapas distintos
+  ✓ Generación procedural de mapas > valida posiciones iniciales y conectividad en 500 semillas
+  ✓ Generación procedural de mapas > ninguna zona transitable queda aislada (los obstáculos no bloquean el mapa)
+  ✓ Generación procedural de mapas > la validación detecta un mapa bloqueado
+  ✓ Generación procedural de mapas > codifica y decodifica las celdas sin pérdidas
+RESULTADO 7 ok, 0 fallidas
+
+== tests/unit/matchConfig.test.ts
+  ✓ Configuración centralizada de puntuación y duración > el modo de 15 puntos conserva exactamente la duración base actual
+  ✓ Configuración centralizada de puntuación y duración > 25 y 30 puntos aumentan la duración de forma progresiva (base × objetivo / 15)
+  ✓ Configuración centralizada de puntuación y duración > solo acepta exactamente 15, 25 o 30 (servidor y esquema Zod)
+  ✓ Configuración centralizada de puntuación y duración > la sala guarda la configuración calculada por el servidor
+  ✓ Condiciones de victoria con objetivo variable > con objetivo 25 la partida NO termina al llegar a 15
+  ✓ Condiciones de victoria con objetivo variable > termina al agotar el tiempo del modo y guarda la configuración usada
+  ✓ Condiciones de victoria con objetivo variable > no acumula puntos ni acepta entradas después de terminar
+  ✓ Condiciones de victoria con objetivo variable > resuelve los empates de forma explícita y consistente
+RESULTADO 8 ok, 0 fallidas
+
+== tests/unit/returnToLobby.test.ts
+  ✓ Regreso al lobby tras una partida > conserva el identificador de la sala y no la duplica
+  ✓ Regreso al lobby tras una partida > el jugador aparece una sola vez en la lista de participantes
+  ✓ Regreso al lobby tras una partida > un doble clic o la retransmisión del evento no repite la operación ni emite duplicados
+  ✓ Regreso al lobby tras una partida > los demás jugadores reciben la lista actualizada cuando el estado cambia
+  ✓ Regreso al lobby tras una partida > el jugador no sigue como miembro activo de la partida terminada
+  ✓ Regreso al lobby tras una partida > si la sala fue eliminada responde de forma explícita
+  ✓ Regreso al lobby tras una partida > quien salió al lobby general ya no puede «volver» y no queda en dos salas
+  ✓ Regreso al lobby tras una partida > funciona con varios participantes y la sala sigue existiendo mientras sea válida
+  ✓ Regreso al lobby tras una partida > la lista de salas está versionada y solo cambia cuando cambia su contenido
+RESULTADO 9 ok, 0 fallidas
+
+== tests/unit/roomManager.test.ts
+  ✓ Salas: permisos y capacidad > protege las salas privadas con código y respeta la capacidad
+  ✓ Salas: permisos y capacidad > transfiere la propiedad al salir el creador y cierra la sala vacía
+  ✓ Salas: estado de listo e inicio de partida > inicia la cuenta atrás solo cuando todos están listos y la cancela si alguien deja de estarlo
+  ✓ Salas: estado de listo e inicio de partida > marca desconectados, permite reconectar y expulsa tras el periodo de gracia
+RESULTADO 4 ok, 0 fallidas
+
+== tests/unit/stats.test.ts
+  ✓ Fórmulas de estadísticas > KDR evita la división entre cero
+  ✓ Fórmulas de estadísticas > Win Rate y tasa de supervivencia en porcentaje
+  ✓ Fórmulas de estadísticas > clasifica por puntuación, eliminaciones, muertes y supervivencia
+  ✓ Generador de datos de prueba (seed) > produce datos coherentes con las reglas del juego
+  ✓ Generador de datos de prueba (seed) > es determinista con la misma semilla
+RESULTADO 5 ok, 0 fallidas
+
+== tests/unit/validation.test.ts
+  ✓ Esquemas Zod: payloads válidos > acepta una intención de movimiento válida
+  ✓ Esquemas Zod: payloads válidos > acepta un payload de seed y aplica valores por defecto
+  ✓ Esquemas Zod: payloads válidos > acepta salas públicas y privadas bien formadas
+  ✓ Esquemas Zod: rechazo de payloads inválidos > rechaza intenciones fuera de rango, no finitas o con campos extra
+  ✓ Esquemas Zod: rechazo de payloads inválidos > rechaza seeds fuera de 100-1000 partidas o con tipos incorrectos
+  ✓ Esquemas Zod: rechazo de payloads inválidos > rechaza credenciales y salas mal formadas con mensajes en español
+RESULTADO 6 ok, 0 fallidas

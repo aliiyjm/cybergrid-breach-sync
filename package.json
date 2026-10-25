@@ -1,0 +1,42 @@
+{
+  "name": "cybergrid-breach-sync",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CyberGrid: Breach & Sync — arena multijugador cyberpunk con servidor autoritativo, Canvas 2D y Socket.IO",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "node scripts/build-client.mjs",
+    "build:server": "node scripts/build-server.mjs",
+    "start": "node --env-file-if-exists=.env server/dist/index.js",
+    "db:migrate": "tsx --env-file-if-exists=.env server/src/database/migrate.ts",
+    "typecheck": "tsc -p shared/tsconfig.json && tsc -p server/tsconfig.json && tsc -p client/tsconfig.json && tsc -p tests/tsconfig.json",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=reports/vitest-junit.xml",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test && npm run test:e2e",
+    "bench:api": "tsx --env-file-if-exists=.env scripts/benchmark-api.ts",
+    "bench:latency": "tsx --env-file-if-exists=.env scripts/measure-latency.ts",
+    "verify:reports": "node scripts/verify-test-reports.mjs",
+    "db:migrate:prod": "node server/dist/migrate.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.15.0",
+    "esbuild": "^0.28.0",
+    "tsx": "^4.20.0",
+    "typescript": "^6.0.0",
+    "vitest": "^3.2.0"
+  }
+}
