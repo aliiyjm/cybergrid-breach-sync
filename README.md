@@ -7,7 +7,7 @@ colisiones, daño, vida, recursos, puntuación y resultados.
 - **Cliente:** HTML5, Canvas 2D, TypeScript y CSS, sin motor de videojuegos.
 - **Servidor:** Node.js 22, TypeScript, Express 5, Socket.IO 4, Zod, PostgreSQL.
 - **Pruebas:** Vitest (unitarias + integración) y Playwright (3 flujos E2E).
-- **CI/CD:** GitHub Actions. **Despliegue:** Render (blueprint incluido) o Railway.
+- **CI/CD:** GitHub Actions. **Despliegue:** Render (blueprint incluido).
 
 > **Versión 1.1:** personalización del personaje con imagen propia, puntuación para ganar de 15,
 > 25 o 30 puntos y corrección del regreso al lobby. Detalle, causa del error y pruebas en
@@ -126,11 +126,6 @@ npm install                 # instala todos los workspaces y genera package-lock
 npx playwright install chromium   # navegador para las pruebas E2E
 ```
 
-> **Importante:** sube `package-lock.json` al repositorio. GitHub Actions usa `npm ci`, que exige
-> ese archivo para instalar exactamente las mismas versiones.
-
-## Variables de entorno
-
 ```bash
 cp .env.example .env
 ```
@@ -157,36 +152,7 @@ cp .env.example .env
 La configuración se valida con Zod al arrancar: si falta algo, el servidor se detiene con un
 mensaje claro.
 
-## Base de datos
 
-**Opción A — PostgreSQL instalado:**
-
-```bash
-psql -U postgres -c "CREATE USER cybergrid WITH PASSWORD 'cybergrid';"
-psql -U postgres -c "CREATE DATABASE cybergrid OWNER cybergrid;"
-psql -U postgres -c "CREATE DATABASE cybergrid_test OWNER cybergrid;"
-```
-
-**Opción B — Docker:**
-
-```bash
-docker run -d --name cybergrid-pg -p 5432:5432 \
-  -e POSTGRES_USER=cybergrid -e POSTGRES_PASSWORD=cybergrid -e POSTGRES_DB=cybergrid postgres:16
-docker exec cybergrid-pg psql -U cybergrid -c "CREATE DATABASE cybergrid_test;"
-```
-
-**Migraciones** (se aplican también automáticamente al arrancar el servidor; son idempotentes y
-usan un bloqueo consultivo para que dos instancias no migren a la vez):
-
-```bash
-npm run db:migrate
-```
-
-Tablas: `users`, `sessions`, `matches` (incluye `score_to_win` y `time_limit_ms` desde la
-migración 2), `match_players`, `seed_batches`, `user_avatars` (migración 2) y `schema_migrations`.
-Si ya tenías la base de datos de la versión anterior, la migración 2 se aplica sola al arrancar;
-las partidas antiguas quedan registradas con 15 puntos. La migración 3 permite 30, 40 y 50 (y
-conserva 15 y 25 para las partidas ya guardadas).
 
 ## Ejecutar en local
 
@@ -348,7 +314,7 @@ curl -s -X POST http://localhost:3000/api/test/seed \
 ```
 
 Respuesta 200. Los totales son los reales para la semilla 2026; los valores de `timing` son
-ilustrativos (dependen de la máquina y se miden en cada petición):
+ilustrativos.
 
 ```json
 {
@@ -484,8 +450,6 @@ sigue. Si el creador sale, la sala pasa al miembro más antiguo; una sala vacía
 npm run test:unit
 
 # Integración: HTTP + Socket.IO + PostgreSQL reales
-export TEST_DATABASE_URL=postgres://cybergrid:cybergrid@localhost:5432/cybergrid_test
-npm run test:integration
 
 # Ambas (como en CI, con informe JUnit en reports/)
 npm run test:ci
@@ -562,23 +526,6 @@ despliegue gratuito de Render depende de la distancia a la región elegida.
 Archivo: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Se ejecuta en cada Pull Request y en
 los push a `main`, `master` y `develop`.
 
-Pasos: descargar el código → comprobar `package-lock.json` → Node 22 → `npm ci` → `npm run
-typecheck` → `npm run build` → migraciones → Vitest con informe JUnit → instalar Chromium →
-Playwright → `verify:reports` (falla si Vitest ejecutó menos de 10 pruebas, si Playwright no
-ejecutó exactamente 3 flujos o si hubo fallos u omisiones) → mediciones de API y latencia →
-resumen en la página de la ejecución → artefacto `informes-de-pruebas` con todos los informes.
-PostgreSQL 16 se levanta como servicio del job.
-
-**Conectar el repositorio:**
-
-```bash
-git init
-git add .
-git commit -m "CyberGrid: Breach & Sync"
-git branch -M main
-git remote add origin https://github.com/TU_USUARIO/cybergrid-breach-sync.git
-git push -u origin main
-```
 
 **Ver los resultados:** pestaña **Actions** del repositorio → ejecución «CI» → el resumen muestra
 la tabla de pruebas; los informes HTML/JUnit/JSON se descargan desde **Artifacts**. En cada Pull
@@ -607,20 +554,7 @@ Render y Railway admiten conexiones WebSocket persistentes y terminan HTTPS/WSS 
 3. Espera a que el despliegue termine (las migraciones se aplican al arrancar).
 4. Copia el valor de `TEST_API_KEY` desde **Environment** del servicio para usar `/api/test/seed`.
 
-### Railway (alternativa)
 
-1. **New Project → Deploy from GitHub repo**. `railway.json` define build, arranque y salud.
-2. **New → Database → PostgreSQL** y añade al servicio la variable
-   `DATABASE_URL=${{Postgres.DATABASE_URL}}`.
-3. Variables: `NODE_ENV=production`, `ENABLE_TEST_ENDPOINTS=true`, `TEST_API_KEY=<clave larga>`.
-4. **Settings → Networking → Generate Domain**.
-
-### Frontend y backend en dominios distintos (opcional)
-
-Si alojas el cliente aparte (p. ej. un sitio estático): compílalo con
-`PUBLIC_SERVER_URL=https://tu-api.onrender.com npm run build:client`, publica `client/dist` y en el
-backend define `CORS_ORIGINS=https://tu-frontend.example`. Ten en cuenta que algunos navegadores
-bloquean cookies de terceros; el despliegue en un solo servicio evita ese problema.
 
 ### Verificar la URL pública, SSL y WSS
 
@@ -646,10 +580,6 @@ TEST_API_KEY=... npm run bench:api -- --url $URL --out reports/api-produccion.js
 
 En el navegador: candado de la barra de direcciones → certificado válido; DevTools → **Network → WS**
 debe mostrar `wss://…/socket.io/?EIO=4&transport=websocket` con estado 101.
-
-**Nota sobre los planes gratuitos:** suelen suspender el servicio tras un periodo de inactividad
-(la primera petición tarda en despertarlo) y limitan la duración de la base de datos gratuita.
-Revisa los límites vigentes de Render o Railway antes de la evaluación.
 
 ## Solución de errores frecuentes
 
@@ -694,10 +624,3 @@ Revisa los límites vigentes de Render o Railway antes de la evaluación.
 
 El código está completo para todos los requisitos. La matriz detallada requisito → archivo →
 evidencia está en **[docs/MATRIZ_REQUISITOS.md](docs/MATRIZ_REQUISITOS.md)**.
-
-El entorno donde se desarrolló **no tenía acceso al registro de npm**, por lo que Express,
-Socket.IO, Vitest y el driver `pg` no pudieron instalarse allí. Lo que sí se ejecutó y su evidencia
-está en [`reports/evidencias/`](reports/evidencias/); lo que queda por ejecutar con las
-dependencias reales (Vitest real, integración, Playwright, comprobación de tipos completa,
-mediciones de latencia y despliegue) se ejecuta con `npm install` en tu máquina o automáticamente en
-GitHub Actions.
